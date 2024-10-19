@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot with PDF Support</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f9f3e6;
+            color: #333;
+        }
+        .chat-container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #ff6f61;
+        }
+        .message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+            display: flex;
+            align-items: center;
+        }
+        .user {
+            background-color: #ffcc80;
+            color: #000;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+        .bot {
+            background-color: #c5e1a5;
+            color: #000;
+            border-radius: 10px;
+        }
+        .message span {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        form {
+            margin-top: 20px;
+            text-align: center;
+        }
+        input[type="text"], input[type="file"] {
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        input[type="submit"], button {
+            padding: 10px 20px;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #ff8563;
+        }
+        #chat-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Handle PDF upload
+            $("form#pdf-upload-form").on("submit", function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                $.ajax({
+                    url: '/',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        alert(response.message);
+                    }
+                });
+            });
+
+            // Handle user question submission
+            $("form#question-form").on("submit", function(event) {
+                event.preventDefault();
+                const userQuestion = $("input[name='user_question']").val();
+                $.ajax({
+                    url: '/',
+                    method: 'POST',
+                    data: { user_question: userQuestion },
+                    success: function(response) {
+                        if (response.success) {
+                            $("#chat-history").append(
+                                `<div class="message user"><span>You:</span> ${userQuestion}</div>
+                                 <div class="message bot"><span>Bot:</span> ${response.response}</div>`
+                            );
+                        }
+                        $("input[name='user_question']").val("");  // Clear input
+                    }
+                });
+            });
+
+            // Reset chat history
+            $("#reset-button").on("click", function() {
+                $.ajax({
+                    url: '/reset',
+                    method: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            $("#chat-history").empty();  // Clear chat history display
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chatbot with PDF-Based Question Answering 🤖</h1>
+
+        <!-- PDF Upload Form -->
+        <form id="pdf-upload-form" method="POST" enctype="multipart/form-data">
+            <label for="pdf_file">Upload a PDF file:</label>
+            <input type="file" name="pdf_file" id="pdf_file" required>
+            <input type="submit" value="Upload">
+        </form>
+
+        <!-- User Question Form -->
+        <form id="question-form" method="POST">
+            <input type="text" name="user_question" placeholder="Ask a question here!" required>
+            <input type="submit" value="Send">
+        </form>
+
+        <!-- Chat History Section -->
+        <h2>Chat History</h2>
+        <div id="chat-history">
+            {% for chat in chat_history %}
+                <div class="message user">
+                    <span>You:</span> {{ chat.user }}
+                </div>
+                <div class="message bot">
+                    <span>Bot:</span> {{ chat.bot }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Reset Chat Button -->
+        <button id="reset-button">Reset Chat</button>
+    </div>
+</body>
+</html>
