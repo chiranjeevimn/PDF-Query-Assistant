@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # Required for session management
 # Initialize the LLM
 def get_api_key():
     """Get the API key from Gemini"""
-    api = "AIzaSyCH5skKep1XmIVMxxqu-6-GgClCME2v2lg"
+    api = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     return api
 
 
